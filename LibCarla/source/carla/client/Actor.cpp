@@ -72,43 +72,43 @@ namespace client {
   //这个函数返回一个std::vector<std::string>类型的值，包含Actor中所有插槽的名称。
   std::vector<std::string> Actor::GetSocketNames() const {
     return GetEpisode().Lock()->GetActorSocketNames(*this);
-  }  
+  }  //是一个成员函数，它属于 Actor 类。这个函数的目的是获取与当前 Actor 实例相关联的套接字（socket）名称列表。
 
   void Actor::SetLocation(const geom::Location &location) {
     GetEpisode().Lock()->SetActorLocation(*this, location);
-  }
+  }//，用于设置当前 Actor 实例的位置
 
   void Actor::SetTransform(const geom::Transform &transform) {
     GetEpisode().Lock()->SetActorTransform(*this, transform);
-  }
+  }//作用是更新当前 Actor 实例的变换信息。这里的变换信息通常涵盖了位置、旋转和缩放等几何属性，这些属性共同定义了 Actor 在虚拟世界或模拟环境中的姿态。
 
   void Actor::SetTargetVelocity(const geom::Vector3D &vector) {
     GetEpisode().Lock()->SetActorTargetVelocity(*this, vector);
-  }
+  }//用于设置当前 Actor 实例的目标速度。这里的 geom::Vector3D 通常是一个封装了三维空间向量信息的类，用于表示速度、方向或其他矢量属性。
 
   void Actor::SetTargetAngularVelocity(const geom::Vector3D &vector) {
     GetEpisode().Lock()->SetActorTargetAngularVelocity(*this, vector);
-  }
+  }//用于设置当前 Actor 实例的目标角速度。这里的 geom::Vector3D 是一个封装了三维空间向量信息的类，它在这个上下文中表示角速度的方向和大小。
 
   void Actor::EnableConstantVelocity(const geom::Vector3D &vector) {
     GetEpisode().Lock()->EnableActorConstantVelocity(*this, vector);
-  }
+  }//为当前的 Actor 实例启用一个恒定的速度，该速度由传入的 geom::Vector3D 类型的参数 vector 指定。
 
   void Actor::DisableConstantVelocity() {
     GetEpisode().Lock()->DisableActorConstantVelocity(*this);
-  }
+  }//用于禁用当前 Actor 实例的恒定速度模式。
 
   void Actor::AddImpulse(const geom::Vector3D &impulse) {
     GetEpisode().Lock()->AddActorImpulse(*this, impulse);
-  }
+  }//给当前的 Actor 实例添加一个冲量
 
   void Actor::AddImpulse(const geom::Vector3D &impulse, const geom::Vector3D &location) {
     GetEpisode().Lock()->AddActorImpulse(*this, impulse, location);
-  }
+  }//用于给当前的 Actor 实例在指定位置添加一个冲量
 
   void Actor::AddForce(const geom::Vector3D &force) {
     GetEpisode().Lock()->AddActorForce(*this, force);
-  }
+  }//于给当前的 Actor 实例添加一个力
 
   void Actor::AddForce(const geom::Vector3D &force, const geom::Vector3D &location) {
     GetEpisode().Lock()->AddActorForce(*this, force, location);
