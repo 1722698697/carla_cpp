@@ -146,56 +146,79 @@ class TestSynchronousMode(SyncSmokeTest):
                 for sensor_data in sensors_data:
                     self.assertEqual(sensor_data[0].frame, snapshot_frame)
                 # All the sensor transforms match in the snapshot and the callback
+
+# 遍历传感器数据列表，比较每个传感器数据的变换（transform）与对应传感器的变换是否一致
                 for i in range(len(sensors_data)):
+# 使用assertEqual方法断言传感器数据的变换与传感器获取的变换相等
                     self.assertEqual(
-                        sensors_data[i][0].transform,
-                        sensors[i].get_transform(),
+                        sensors_data[i][0].transform,# 传感器数据的变换
+                        sensors[i].get_transform(),   # 传感器当前的变换
+# 如果不相等，输出错误信息，包括传感器数据的来源帧、传感器数据的变换和传感器当前的变换
                         "\n\nThe sensor and sensor_data transforms from '" +
                         str(sensors_data[i][1]) + "' does not match in the same frame! (" +
                         str(local_frame) + ")\nSensor Data:\n  " +
                         str(sensors_data[i][0].transform) + "\nSensor Transform:\n  " +
                         str(sensors[i].get_transform()))
-                local_frame += 1
+                local_frame += 1             # 更新当前处理的帧号
 
+# 无论是否发生异常，都执行以下清理操作
         finally:
+# 遍历传感器列表，停止并销毁每个传感器
             for sensor in sensors:
                 if sensor is not None:
                     sensor.stop()
                     sensor.destroy()
+ # 如果车辆对象存在，销毁车辆
             if car is not None:
                 car.destroy()
 
-    def batch_scenario(self, batch_tick, after_tick):
-        bp_veh = self.world.get_blueprint_library().filter("vehicle.*")[0]
-        veh_transf = self.world.get_map().get_spawn_points()[0]
 
+# 定义一个方法，用于执行批量场景测试，包括车辆的生成和销毁，以及测试帧的变化
+    def batch_scenario(self, batch_tick, after_tick):
+ # 从蓝图库中获取第一个车辆蓝图
+        bp_veh = self.world.get_blueprint_library().filter("vehicle.*")[0]
+ # 获取地图上的第一个生成点作为车辆生成位置
+        veh_transf = self.world.get_map().get_spawn_points()[0]
+# 获取当前世界的快照帧号
         frame_init = self.world.get_snapshot().frame
 
+# 创建一个包含生成车辆命令的批量命令列表
         batch = [carla.command.SpawnActor(bp_veh, veh_transf)]
 
+# 同步执行批量命令
         responses = self.client.apply_batch_sync(batch, batch_tick)
+# 如果指定了在命令后执行一个tick，则执行
         if after_tick:
             self.world.tick()
 
+  # 检查响应，确保车辆正确生成
         if len(responses) != 1 or responses[0].error:
             self.fail("%s: The test car could not be correctly spawned" % (bp_veh.id))
 
+# 获取生成的车辆ID
         vehicle_id = responses[0].actor_id
 
+# 获取执行命令后的快照帧号
         frame_after = self.world.get_snapshot().frame
-
+ # 销毁生成的车辆
         self.client.apply_batch_sync([carla.command.DestroyActor(vehicle_id)])
 
+    # 返回执行命令前后的帧号
         return frame_init, frame_after
 
+# 定义一个测试方法，用于测试apply_batch_sync的功能
     def test_apply_batch_sync(self):
         print("TestSynchronousMode.test_apply_batch_sync")
 
+ # 测试不同情况下apply_batch_sync的行为
+    # 不在批量命令后执行tick，也不在执行命令前等待tick
         a_t0, a_t1 = self.batch_scenario(False, False)
         self.assertEqual(a_t0, a_t1, "Something has failed with the apply_batch_sync. These frames should be equal: %d %d" % (a_t0, a_t1))
 
+ # 不在批量命令后执行tick，但在执行命令前等待一个tick
         a_t0, a_t1 = self.batch_scenario(True, False)
         self.assertEqual(a_t0+1, a_t1, "Something has failed with the apply_batch_sync. These frames should be consecutive: %d %d" % (a_t0, a_t1))
 
+ # 在批量命令后执行tick，但不在执行命令前等待tick
         a_t0, a_t1 = self.batch_scenario(False, True)
         self.assertEqual(a_t0+1, a_t1, "Something has failed with the apply_batch_sync. These frames should be consecutive: %d %d" % (a_t0, a_t1))
